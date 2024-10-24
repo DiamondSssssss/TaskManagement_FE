@@ -1,0 +1,113 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600&display=swap');
+
+:root {
+  --primary-color: #3498db;
+  --secondary-color: #2ecc71;
+  --background-color: #f4f7f9;
+  --text-color: #333;
+  --input-bg: #ffffff;
+  --input-border: #e0e0e0;
+}
+
+body {
+  font-family: 'Poppins', sans-serif;
+  background-color: var(--background-color);
+  color: var(--text-color);
+  margin: 0;
+  padding: 0;
+}
+
+.register-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  padding: 2rem;
+}
+
+.register-form-container {
+  background-color: #ffffff;
+  padding: 3rem;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+  width: 100%;
+  max-width: 400px;
+}
+
+h1 {
+  font-size: 2rem;
+  color: var(--primary-color);
+  margin-bottom: 0.5rem;
+}
+
+p {
+  color: #666;
+  margin-bottom: 1.5rem;
+}
+
+.form-group {
+  margin-bottom: 1.5rem;
+}
+
+label {
+  display: block;
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+}
+
+input {
+  width: 93.5%;
+  padding: 0.75rem;
+  border: 1px solid var(--input-border);
+  border-radius: 5px;
+  font-size: 1rem;
+  transition: border-color 0.3s ease;
+}
+
+input:focus {
+  outline: none;
+  border-color: var(--primary-color);
+}
+
+.btn-register {
+  width: 100%;
+  padding: 0.75rem;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: 5px;
+  font-size: 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.btn-register:hover {
+  background-color: #2980b9;
+}
+
+.login-link {
+  text-align: center;
+  margin-top: 1rem;
+}
+
+.login-link a {
+  color: var(--primary-color);
+  text-decoration: none;
+  font-weight: 600;
+}
+
+.login-link a:hover {
+  text-decoration: underline;
+}
+
+@media (max-width: 480px) {
+  .register-form-container {
+    padding: 1.5rem;
+  }
+
+  h1 {
+    font-size: 1.75rem;
+  }
+}
+
