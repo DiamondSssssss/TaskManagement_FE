@@ -24,10 +24,8 @@ const Login = () => {
     try {
       const response = await axios.post(LOGIN_URL, formData);
       console.log('Login successful:', response.data);
-      login(response.data);
-
-
-      navigate('/main'); // Redirect to dashboard after successful login
+      login(response.data); // Make sure this includes the accountId
+      navigate('/main');
     } catch (err) {
       setError('Invalid username or password');
       console.error('Login error:', err);

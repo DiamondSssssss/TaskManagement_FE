@@ -1,7 +1,7 @@
 import React, { useState, useContext, useEffect } from 'react';
 import { Navigate, useNavigate } from 'react-router-dom';
 import { AuthContext } from '../../context/AuthContext';
-import { Typography, Row, Col, Button, Input, Table, message, Modal, Form, Select, DatePicker, Switch, Descriptions } from 'antd';
+import { Typography, Row, Col, Button, Input, Table, message, Modal, Form, Select, DatePicker, Switch, Descriptions, Tag } from 'antd';
 import axios from 'axios';
 import { TASKS_URL } from '../../utils/api';
 import moment from 'moment';
@@ -18,11 +18,15 @@ function Main() {
   const [isDetailModalVisible, setIsDetailModalVisible] = useState(false);
   const [isEditModalVisible, setIsEditModalVisible] = useState(false);
   const navigate = useNavigate();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetchAllTasks();
-    setSelectedTask(null); // Reset selected task on component mount
-  }, []);
+    if (user) {
+      fetchAllTasks();
+    } else {
+      setLoading(false);
+    }
+  }, [user]);
 
   useEffect(() => {
     if (selectedTask) {
@@ -50,50 +54,70 @@ function Main() {
     form.resetFields(); // Reset form fields on cancel
   };
 
+  const calculateTimeRemaining = (deadline) => {
+    const now = moment();
+    const deadlineDate = moment(deadline);
+    const daysRemaining = deadlineDate.diff(now, 'days');
+    return daysRemaining;
+  };
+
+  const sortTasks = (tasks) => {
+    return tasks.sort((a, b) => {
+      // Sort by priority first (Uu tien = 1, Khong Uu tien = 0)
+      if (a.type !== b.type) {
+        return b.type - a.type;
+      }
+      // If priority is the same, sort by time remaining
+      const aTimeRemaining = calculateTimeRemaining(a.deadline);
+      const bTimeRemaining = calculateTimeRemaining(b.deadline);
+      return aTimeRemaining - bTimeRemaining;
+    });
+  };
+
   const fetchAllTasks = async () => {
+    if (!user || !user.accountId) {
+      console.error('User or accountId is not available');
+      setLoading(false);
+      return;
+    }
     try {
-      const response = await axios.get(`${TASKS_URL}/account/${user.accountId}`); // Updated endpoint
+      const response = await axios.get(`${TASKS_URL}/account/${user.accountId}`);
       const formattedTasks = response.data.map(task => ({
         key: task.taskId,
         task: task.taskName,
         type: task.taskType,
-        deadline: moment(task.deadline).format('YYYY-MM-DD'),
+        deadline: moment(task.deadline).format('YYYY-MM-DD HH:mm:ss'), // Change this line
         status: task.status,
         description: task.description,
+        timeRemaining: calculateTimeRemaining(task.deadline),
       }));
-      setTasks(formattedTasks);
+      setTasks(sortTasks(formattedTasks));
+      setLoading(false);
     } catch (error) {
       console.error('Error fetching tasks:', error);
       message.error('Failed to fetch tasks');
+      setLoading(false);
     }
   };
   
 
   const handleAddTask = async (values) => {
     try {
+      console.log('Received values:', values);
       const taskData = {
         taskName: values.taskName,
         description: values.taskDescription,
         taskType: values.taskType,
-        deadline: moment(values.taskDeadline).toISOString(), // Ensure correct date format
-        status: 1, // Default status
-        accountId: user.accountId // Use the accountId of the logged-in user
+        deadline: values.taskDeadline.toISOString(), // Change this line
+        status: 1,
+        accountId: user.accountId
       };
+      console.log('Task data to be sent:', taskData);
 
-      const response = await axios.post(TASKS_URL, taskData);
-      setTasks(prevTasks => [
-        ...prevTasks,
-        {
-          key: response.data.taskId,
-          task: response.data.taskName,
-          type: response.data.taskType,
-          deadline: moment(response.data.deadline).format('YYYY-MM-DD'),
-          status: response.data.status,
-          description: response.data.description,
-        },
-      ]);
+      await axios.post(TASKS_URL, taskData);
       message.success('Task added successfully');
       handleCancel();
+      await fetchAllTasks();
     } catch (error) {
       console.error('Error adding task:', error);
       message.error('Failed to add task');
@@ -229,6 +253,34 @@ function Main() {
       key: 'task',
     },
     {
+      title: 'Type',
+      dataIndex: 'type',
+      key: 'type',
+      render: (type) => (
+        <Tag color={type === 1 ? 'green' : 'blue'}>
+          {type === 1 ? 'Uu tien' : 'Khong Uu tien'}
+        </Tag>
+      ),
+    },
+    {
+      title: 'Deadline',
+      dataIndex: 'deadline',
+      key: 'deadline',
+      render: (text, record) => moment(record.deadline).format('YYYY-MM-DD HH:mm:ss'),
+    },
+    {
+      title: 'Time Remaining',
+      key: 'timeRemaining',
+      render: (_, record) => {
+        const remaining = calculateTimeRemaining(record.deadline);
+        return (
+          <span style={{ color: remaining < 0 ? 'red' : 'inherit' }}>
+            {remaining < 0 ? `${Math.abs(remaining)} days overdue` : `${remaining} days`}
+          </span>
+        );
+      },
+    },
+    {
       title: 'Status',
       dataIndex: 'status',
       key: 'status',
@@ -268,14 +320,22 @@ function Main() {
     },
   ];
 
+  if (loading) {
+    return <div>Loading...</div>; // Or use a proper loading spinner
+  }
+
+  if (!user) {
+    return <Navigate to="/login" />;
+  }
+
   return (
     <>
       {user && (
         <div style={{ display: 'flex', justifyContent: 'flex-end' }}>
           <Title level={4}>Welcome, {user.username}!</Title>
           <Button danger primary onClick={handleLogout} style={{ marginLeft: '20px' }}>
-      Logout
-    </Button>
+        Logout
+      </Button>
         </div>
       )}
       <Row
@@ -342,7 +402,11 @@ function Main() {
             </Select>
           </Form.Item>
           <Form.Item name="taskDeadline" label="Deadline" rules={[{ required: true }]}>
-            <DatePicker style={{ width: '100%' }} />
+            <DatePicker 
+              showTime 
+              format="YYYY-MM-DD HH:mm:ss" 
+              style={{ width: '100%' }} 
+            />
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit" style={{ width: '100%' }}>
