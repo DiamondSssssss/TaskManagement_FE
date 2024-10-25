@@ -4,7 +4,6 @@ import { AuthContext } from '../../context/AuthContext';
 import { Typography, Row, Col, Button, Input, Table, message, Modal, Form, Select, DatePicker, Switch, Descriptions } from 'antd';
 import axios from 'axios';
 import { TASKS_URL } from '../../utils/api';
-import TaskDetail from '../TaskDetail/TaskDetail';
 import moment from 'moment';
 
 const { Title } = Typography;
@@ -39,7 +38,7 @@ function Main() {
   const handleLogout = () => {
     logout(); // Call the logout function
     message.success('Logged out successfully'); // Optionally show a success message
-    navigate('/login');
+    navigate('/home');
   };
 
   const showModal = () => {

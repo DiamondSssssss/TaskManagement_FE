@@ -1,16 +1,22 @@
 import React from 'react'
 import { Link } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom'
 import './HomePage.css'
 
+
 const HomePage = () => {
+  const navigate = useNavigate()
   return (
     <div className="home-page">
       <nav className="navbar">
         <div className="container">
-          <div className="logo">TaskMaster</div>
+          <div className="logo">
+            <img src="https://static.vecteezy.com/system/resources/previews/003/529/153/non_2x/business-to-do-list-flat-icon-modern-style-vector.jpg" alt="TaskMaster logo" />
+            <span className="logo-text">TaskMaster</span>
+          </div>
           <div className="nav-links">
             <Link to="/features">Features</Link>
-            <Link to="/pricing">Pricing</Link>
+            <Link to="/pricing" >Pricing</Link>
             <Link to="/about">About</Link>
             <Link to="/login" className="btn btn-secondary">Log In</Link>
             <Link to="/register" className="btn btn-primary">Sign Up</Link>
@@ -26,7 +32,7 @@ const HomePage = () => {
             <Link to="/register" className="btn btn-primary btn-large">Get Started for Free</Link>
           </div>
           <div className="hero-image">
-            <img src="/path/to/your/hero-image.png" alt="TaskMaster app interface" />
+            <img src="https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnqJ-RcglgT7sq9Lt5zd3CrApFhHjp6uAPFA&s" alt="TaskMaster app interface" />
           </div>
         </div>
       </header>
